@@ -6,12 +6,38 @@ import { invoke } from "@tauri-apps/api"
  * @param args the list of args to add to the command
  * @returns 
  */
-export default async function runCommand(args: string[]) {
+export default async function runCommand(args: string[], token?: string): Promise<string> {
 
+    // add the auth token value to the command
+    if (token) {
+        args.push("--session", token);
+    }
+
+    // add the raw flag if not included already
     if (!args.includes("--raw")) {
-        // add the raw flag if not included already
         args.push("--raw");
     }
 
-    return await invoke("run_cli_command", { commandArgs: args });
+    try {
+        // run the command in rust
+        const result = await invoke<{ stdout: string, stderr: string }>("run_cli_command", { commandArgs: args });
+
+        // check if stderr is empty
+        if (result.stderr) {
+            throw new Error(result.stderr);
+        }
+
+        // return the text result
+        return result.stdout;
+    } catch (err) {
+
+        if (typeof err === "string") {
+            throw new Error(err);
+        }
+
+        if (err instanceof Error) {
+            throw err;
+        }
+        throw new Error("Unknown Error.");
+    }
 }

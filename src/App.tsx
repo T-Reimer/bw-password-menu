@@ -14,23 +14,14 @@ import PasswordList from "./PasswordList";
  */
 
 function App() {
-    const [password, setPassword] = useState("");
-
-    /**
-     * Check if the password supplied unlocks the bitwarden vault
-     * @param value
-     */
-    const authenticate = async (value: string) => {
-        // check if the bw vault unlocks from the supplied password
-        // save the password to state to unlock show the list of passwords
-    };
+    const [token, setToken] = useState("");
 
     return (
         <div className="App">
-            {password ? (
-                <PasswordList password={password} />
+            {token ? (
+                <PasswordList token={token} />
             ) : (
-                <AuthenticateUser />
+                <AuthenticateUser onAuth={token => setToken(token)} />
             )}
         </div>
     );
